@@ -241,7 +241,7 @@ namespace rviz_mesh_plugin
     if (wireframeAlpha < 1.0)
     {
       pass->setSceneBlending(Ogre::SBT_TRANSPARENT_ALPHA);
-      pass->setDepthWriteEnabled(false);
+      pass->setDepthWriteEnabled(true);
     }
     pass->setPolygonMode(Ogre::PM_WIREFRAME);
     pass->setCullingMode(Ogre::CULL_NONE);
@@ -269,9 +269,9 @@ namespace rviz_mesh_plugin
     if (useVertexColors)
     {
       pass->setLightingEnabled(false);
+      pass->setDepthWriteEnabled(true);
     }
-
-    if (facesAlpha < 1.0)
+    else if (facesAlpha < 1.0)
     {
       pass->setSceneBlending(Ogre::SBT_TRANSPARENT_ALPHA);
       pass->setDepthWriteEnabled(false);
@@ -299,7 +299,7 @@ namespace rviz_mesh_plugin
     if (normalsAlpha < 1.0)
     {
       pass->setSceneBlending(Ogre::SBT_TRANSPARENT_ALPHA);
-      pass->setDepthWriteEnabled(false);
+      pass->setDepthWriteEnabled(true);
     }
     pass->setPolygonMode(Ogre::PM_SOLID);
     pass->setCullingMode(Ogre::CULL_NONE);
@@ -438,7 +438,6 @@ void TexturedMeshVisual::updateNormals(float ScalingFactor)
 
 void TexturedMeshVisual::enteringGeneralTriangleMesh(const mesh_msgs::MeshGeometry& mesh)
 {
-
   std::stringstream sstm;
 
   sstm << m_prefix << "_TexturedMesh_" << m_postfix << "_" << m_random << "GeneralMaterial_";
@@ -451,6 +450,7 @@ void TexturedMeshVisual::enteringGeneralTriangleMesh(const mesh_msgs::MeshGeomet
     );
 
   // start entering data
+  m_mesh->clear();
   m_mesh->begin(sstm.str(), Ogre::RenderOperation::OT_TRIANGLE_LIST);
 
   // write vertices
@@ -494,7 +494,6 @@ void TexturedMeshVisual::enteringColoredTriangleMesh(
   const mesh_msgs::MeshGeometry& mesh,
   const mesh_msgs::MeshVertexColors& vertexColors)
 {
-
   if (m_meshGeneralMaterial.isNull())
   {
     std::stringstream sstm;
@@ -509,6 +508,7 @@ void TexturedMeshVisual::enteringColoredTriangleMesh(
   }
 
   // start entering data
+  m_mesh->clear();
   m_mesh->begin(m_meshGeneralMaterial->getName(), Ogre::RenderOperation::OT_TRIANGLE_LIST);
 
   // write vertices
@@ -580,7 +580,6 @@ void TexturedMeshVisual::enteringTriangleMeshWithVertexCosts(
   float maxCost
 )
 {
-
   float range = maxCost - minCost;
   if (range <= 0)
   {
@@ -603,10 +602,16 @@ void TexturedMeshVisual::enteringTriangleMeshWithVertexCosts(
     Ogre::Pass* pass = m_vertexCostMaterial->getTechnique(0)->getPass(0);
     pass->setCullingMode(Ogre::CULL_NONE);
     pass->setLightingEnabled(false);
-  }
 
-  // start entering data
-  m_vertexCostsMesh->begin(m_vertexCostMaterial->getName(), Ogre::RenderOperation::OT_TRIANGLE_LIST);
+    // start entering data
+    m_vertexCostsMesh->clear();
+    m_vertexCostsMesh->begin(m_vertexCostMaterial->getName(), Ogre::RenderOperation::OT_TRIANGLE_LIST);
+  }
+  else
+  {
+    // start updating data
+    m_vertexCostsMesh->beginUpdate(0);
+  }
 
   // write vertices
   // write vertex colors
@@ -667,7 +672,8 @@ void TexturedMeshVisual::enteringTexturedTriangleMesh(
   pass->setCullingMode(Ogre::CULL_NONE);
   pass->setLightingEnabled(false);
 
-
+  // start entering data
+  m_noTexCluMesh->clear();
   m_noTexCluMesh->begin(m_noTexCluMaterial->getName(), Ogre::RenderOperation::OT_TRIANGLE_LIST);
 
   size_t noTexCluVertexCount = 0;
@@ -718,6 +724,7 @@ void TexturedMeshVisual::enteringTexturedTriangleMesh(
     if (hasTexture)
     {
       // start entering data
+      m_texturedMesh->clear();
       m_texturedMesh->begin(m_textureMaterials[textureIndex]->getName(), Ogre::RenderOperation::OT_TRIANGLE_LIST);
       textureIndex++;
 
@@ -839,6 +846,7 @@ void TexturedMeshVisual::enteringNormals(const mesh_msgs::MeshGeometry& mesh)
   );
 
   // Create pointNormals
+  m_normals->clear();
   m_normals->begin(sstm.str(), Ogre::RenderOperation::OT_LINE_LIST);
 
   // Vertices

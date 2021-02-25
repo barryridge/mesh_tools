@@ -187,6 +187,12 @@ public:
     void addLabel(std::string groupName, std::string labelName, std::vector<uint32_t>& faceIds);
 
     /**
+     * @brief Adds or updates the label (labelName) to the label group with the given faces.
+     * E.g.: tree_1 -> groupName=tree; labelName=1; separated by the '_'
+     */
+    void addOrUpdateLabel(std::string groupName, std::string labelName, std::vector<uint32_t>& faceIds);
+
+    /**
      * @brief Adds the keypoints with their corresponding positions to the attributes_group. The position
      * is saved to the entry via an attribute called 'vector'.
      */
@@ -230,17 +236,17 @@ public:
 private:
     hf::File m_file;
 
-    // group names
+    void creatOrGetGroups();
 
-    static constexpr const char* GEOMETRY_GROUP = "/geometry";
-    static constexpr const char* ATTRIBUTES_GROUP = "/attributes";
-    static constexpr const char* CLUSTERSETS_GROUP = "/clustersets";
-    static constexpr const char* TEXTURES_GROUP = "/textures";
-    static constexpr const char* LABELS_GROUP = "/labels";
+    size_t getSize(hf::DataSet& data_set);
+    // group names
+    static constexpr const char* CHANNELS_GROUP = "/mesh/channels";
+    static constexpr const char* CLUSTERSETS_GROUP = "/mesh/clustersets";
+    static constexpr const char* TEXTURES_GROUP = "/mesh/textures";
+    static constexpr const char* LABELS_GROUP = "/mesh/labels";
 
     // main groups for reference
-    hf::Group m_geometryGroup;
-    hf::Group m_attributesGroup;
+    hf::Group m_channelsGroup;
     hf::Group m_clusterSetsGroup;
     hf::Group m_texturesGroup;
     hf::Group m_labelsGroup;
